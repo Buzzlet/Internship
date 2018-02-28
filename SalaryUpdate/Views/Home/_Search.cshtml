@@ -1,0 +1,78 @@
+﻿@model SalaryUpdate.ViewModels.SalaryUpdateViewModel
+
+<div class="col-md-6">
+    @using (Html.BeginForm("Search", "Home", FormMethod.Post, new { @class = "form-horizontal", id = "search-form" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(x => x.AllowSearch)
+        @Html.HiddenFor(x => x.AllowUpdate)
+        @Html.HiddenFor(x => x.AllowCsvButton)
+        @Html.HiddenFor(x => x.LastSuccess)
+        @Html.HiddenFor(x => x.Status)
+        @Html.HiddenFor(x => x.StatusPass)
+        @Html.HiddenFor(x => x.MultiEmployer)
+        @Html.HiddenFor(x => x.ReadOnly)
+
+        <div class="panel panel-primary">
+            <div class="panel-heading clearfix">
+                <h3 class="panel-title pull-left"><i class="fa fa-search"></i> Employee Selection</h3>
+                <div class="pull-right">
+
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <table class="search">
+                    <tbody>
+                        <tr>
+                            <th class="text-right">Employer:</th>
+                            <td style="width: 1px;">@Html.TextBoxFor(m => m.Employer.EmployerId, new { id = "employerId", @class = "form-control input-sm", maxlength = "5", required = "true", autofocus = "true", tabindex = "1" })</td>
+                            <td>
+                                @(Model.Employer != null ? $"{Model.Employer?.EmployerId} - {Model.Employer?.Name}" : "")
+                                @Html.ValidationMessageFor(m => m.Employer.EmployerId, "", new { @class = "text-danger" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="text-right">Employee:</th>
+                            <td>@Html.TextBoxFor(m => m.Employee.EmployeeId, new { @class = "form-control input-sm", tabindex = "2" })</td>
+                            <td>
+                                @(Model.Employee?.Name)
+                                @Html.ValidationMessageFor(m => m.Employee.EmployeeId, "", new { @class = "text-danger" })
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="panel-footer clearfix">
+                <div class="h5 pull-left">
+                    @if (Model.MultiEmployer)
+                    {
+                        <strong>Multi-Employer: YES</strong>
+                    }
+                </div>
+                <div class="pull-right">
+                    <button id="search" type="submit" class="btn btn-primary" tabindex="3"><i class="fa fa-search"></i> Search</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="col-md-6">
+    @if (Model.MultiEmployer)
+    {
+        <div class="alert alert-warning">
+            <strong><i class="fa fa-warning"></i> Warning:</strong> Your search indicated this is a <strong>Multi-Employer</strong> entry, please verify you have all of the necessary information.
+        </div>
+    }
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#search-form").submit(function (e) {
+            var employerId = $("#employerId");
+            if (employerId.val() !== "")
+                employerId.val(String('00000' + employerId.val()).slice(-5));
+        });
+    });
+</script>

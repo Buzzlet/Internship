@@ -1,0 +1,222 @@
+﻿@using SalaryUpdate.Services
+@model SalaryUpdate.ViewModels.SalaryUpdateViewModel
+
+@using (Html.BeginForm("Save", "Home", FormMethod.Post, new { enctype = "multipart/form-data", id = "SalaryForm" }))
+{
+    var isIcEmployer = Model.Employer != null && Security.RestrictedEmployers.Contains("~" + Model.Employer.EmployerId);
+
+    <div class="col-md-6">
+        @Html.ValidationSummary(false, "Please correct the following issues:", new { @class = "alert alert-danger" })
+    </div>
+
+    <div class="col-md-12">
+        <div id="comp-panel" class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <h3 class="panel-title pull-left">
+                    <i class="fa fa-usd"></i> Compensation -
+                    <span style="font-size: 0.8em;">Employee Status: <span id="@nameof(Model.Employee.Status)">@(Model.Employee?.Status)</span></span>
+                </h3>
+                @if (Model.Employee?.Status == "1234")
+                {
+                <span class="alert alert-warning"><i class="fa fa-warning"></i> Warning: Employee has 1234 Status</span>
+                }
+                <div class="h3 panel-title pull-right">
+                    <span>Last Successful Update</span>
+                    <i class="fa fa-arrow-right"></i>
+                    <span class="@(Model.LastSuccess == "N/A" ? "text-danger" : "text-success")">@Model.LastSuccess</span>
+                </div>
+            </div>
+            <div class="panel-body">
+                @Html.AntiForgeryToken()
+
+                @Html.HiddenFor(x => x.AllowSearch)
+                @Html.HiddenFor(x => x.AllowUpdate)
+                @Html.HiddenFor(x => x.AllowCsvButton)
+                @Html.HiddenFor(x => x.LastSuccess)
+                @Html.HiddenFor(x => x.Status)
+                @Html.HiddenFor(x => x.StatusPass)
+                @Html.HiddenFor(x => x.ReadOnly)
+                @Html.HiddenFor(x => x.MultiEmployer)
+                @Html.HiddenFor(x => x.Employer.EmployerId)
+                @Html.HiddenFor(x => x.Employee.EmployeeId)
+                @Html.HiddenFor(x => x.ReturnedSalary.DateCreated)
+                @Html.HiddenFor(x => x.ReturnedSalary.DateModified)
+
+                <table class="compensation">
+                    <tbody>
+                        <tr>
+                            <th class="text-center"></th>
+                            <th class="text-center">Hours</th>
+                            <th class="text-center" colspan="2">Basic Cash Salary</th>
+                            <th class="text-center" colspan="2">Meal Allowance Provided</th>
+                            <th class="text-center" colspan="2">Cash Meal Allowance</th>
+                            <th class="text-center" colspan="2">Cash Cellphone Allowance</th>
+                            <th class="text-center" colspan="2">Total Salary</th>
+                        </tr>
+                        <tr class="current">
+                            <th class="text-right">Current:</th>
+                            <td id="StandHours">@((!isIcEmployer || Model.AllowSearch) ? Model.Employee?.Hours.ToString() : "")</td>
+                            <th><i class="fa fa-usd"></i></th>
+                            <td id="BasicCashSalary">@((!isIcEmployer || Model.AllowSearch) ? Model.Employee?.CashSalary.ToString("N") : "")</td>
+                            <th><i class="fa fa-usd"></i></th>
+                            <td id="MealAllowanceProvided">@((!isIcEmployer || Model.AllowSearch) ? Model.Employee?.MealAllowanceProvided.ToString("N") : "")</td>
+                            <th><i class="fa fa-usd"></i></th>
+                            <td id="CashMealAllowance">@((!isIcEmployer || Model.AllowSearch) ? Model.Employee?.CashMealAllowance.ToString("N") : "")</td>
+                            <th><i class="fa fa-usd"></i></th>
+                            <td id="CashCellphoneAllowance">@((!isIcEmployer || Model.AllowSearch) ? Model.Employee?.CashCellphoneAllowance.ToString("N") : "")</td>
+                            <th><i class="fa fa-usd"></i></th>
+                            <td id="TotalSalary">@((!isIcEmployer || Model.AllowSearch) ? Model.Employee?.TotalSalary.ToString("N") : "")</td>
+                        </tr>
+                        <tr class="new">
+                            <th class="text-right">Salary Update:</th>
+                            <td>@Html.TextBoxFor(m => m.ReturnedSalary.NewHoursPerWeek, new { @class = "form-control input-sm", id = "NewHoursPerWeek", style = "width: 75px;", autofocus = "true", tabindex = "4" })</td>
+                            <th><i class="fa fa-usd"></i></th>
+                            <td>@Html.TextBoxFor(m => m.ReturnedSalary.NewBasicCash, new { @class = "form-control input-sm calcTotal", id = "NewBasicCash", tabindex = "5" })</td>
+                            <th><i class="fa fa-usd"></i></th>
+                            <td>@Html.TextBoxFor(m => m.ReturnedSalary.NewMealsProvided, new { @class = "form-control input-sm calcTotal", id = "NewMealsProvided", tabindex = "6" })</td>
+                            <th><i class="fa fa-usd"></i></th>
+                            <td>@Html.TextBoxFor(m => m.ReturnedSalary.NewCashMealAllowance, new { @class = "form-control input-sm calcTotal", id = "NewCashMealAllowance", tabindex = "8" })</td>
+                            <th><i class="fa fa-usd"></i></th>
+                            <td>@Html.TextBoxFor(m => m.ReturnedSalary.NewCashCellphoneAllowance, new { @class = "form-control input-sm calcTotal", id = "NewCashCellphoneAllowance", tabindex = "9" })</td>
+                            <th><i class="fa fa-usd"></i></th>
+                            <td>@Html.TextBoxFor(m => m.ReturnedSalary.NewTotalSalary, new { @class = "form-control input-sm", id = "NewTotalSalary", tabindex = "10" })</td>
+
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td colspan="2" class="text-center">
+                                <div class="checkbox checkbox-primary">
+                                    <input id="calculated" type="checkbox" tabindex="7" />
+                                    <label for="calculated">Calculated</label>
+                                </div>
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td colspan="2" class="text-right"><strong>Running Total</strong></td>
+                            <td><i class="fa fa-usd"></i></td>
+                            <td>@Html.TextBoxFor(m => m.RunningTotal, new { @class = "form-control input-sm" })</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="panel-footer clearfix">
+                <div class="h5 pull-left">
+                    Status
+                    <i class="fa fa-arrow-right"></i>
+                    <span class="@(Model.StatusPass ? "text-success" : "text-danger")">@Model.Status</span>
+                </div>
+                <div class="pull-right">
+                    <button id="submit" type="submit" class="btn btn-success" tabindex="11"><i class="fa fa-paper-plane"></i> Submit</button>
+                    <a id="clear" href="@Url.Action("Index", "Home", new {lastSuccess = Model.LastSuccess})" class="btn btn-danger" tabindex="12"><i class="fa fa-trash-o"></i> Clear</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+
+    /****************************************************************************************
+    On page load, focus is given to the element with given tabindex (this comment is useless)
+    ****************************************************************************************/
+    $(document).ready(function () {
+        (function() {
+            if ('@Model.ReadOnly' === '@true') {
+                $("#comp-panel input[type='text']").prop('readonly', true);
+                $("#comp-panel input[type='checkbox']").prop('disabled', true);
+                $("#submit").prop('disabled', true);
+            } else {
+                $("#comp-panel input[type='text']").prop('readonly', false);
+                $("#comp-panel input[type='checkbox']").prop('disabled', false);
+                $("#submit").prop('disabled', false);
+            }
+        }());
+
+        (function() {
+            var tabIndex = @Html.Raw(Json.Encode(Model.TabIndex));
+            $('[tabindex="' + tabIndex + '"]').focus().select();
+        }());
+
+        $("#comp-panel input.calcTotal").blur(function() {
+            CalculateTotal($(this));
+        });
+
+        /**************************************************************************************
+        * Meall allowance provided is 5% of NewBasicCash. When the check is changed, do the calculation
+        ***************************************************************************************/
+        $("#calculated").click(function() {
+            var calculated = $("#calculated");
+            var basicCash = $("#NewBasicCash");
+            var cashAllowanceProvided = $("#NewCashAllowanceProvided");
+
+            if (calculated.is(':checked') && basicCash.val() > 0) {
+                cashAllowanceProvided.val(Math.round(((0.05 * basicCash.val()) * 100) / 100).toFixed(2));
+            } else {
+                cashAllowanceProvided.val("0.00");
+            }
+            CalculateTotal("");
+        });
+    });
+
+    /***********************************************************************************
+    On form submit, determine if we need to display any bootbox confirms don't submit if
+    one of the bootbox confirms is declined
+    ***********************************************************************************/
+    $('#SalaryForm').submit(function(e) {
+        //var currentForm = $(this);
+        //e.preventDefault();
+
+        CalculateTotal("");
+
+        var percentageConfirm = CheckPercentage();
+        var statusConfirm = CheckStatus();
+
+        if (!percentageConfirm || !statusConfirm) e.preventDefault(); //currentForm.submit();
+    });
+
+    /***********************************************************
+    * We want to ask for confirmation for salary changes of 150% +
+    ***********************************************************/
+    function CheckPercentage() {
+        var currentSalary = $("#TotalSalary").html().replace(/,/g, '');
+        var newSalary = $("#NewTotalSalary").val().replace(/,/g, '');
+        var currentPlusFiftyPercent = (+currentSalary * 1.5);
+
+        if (+newSalary > currentPlusFiftyPercent)
+            return confirm('The new amount is greater than the current salary plus 50%.\nDo you wish to proceed with the update?');
+        return true;
+        //return (+newSalary > currentPlusFiftyPercent);
+    }
+
+    /*************************************************************
+    * Ask for confirmation if the employee is 1234 status
+    * Not sure what 1234 means, but it's risky! So let's warn the user
+    *************************************************************/
+    function CheckStatus() {
+        if ($("#EmpStatus").html().trim() === "1234")
+            return confirm('The employee status is 1234.\nDo you wish to proceed with the update?');
+        return true;
+
+        //return ($("#EmpStatus").html().trim() === "1234");
+    }
+
+    /***********************************************************************************
+    * Keep a running total of the boxes and display it in the runningTotal textbox
+    ***********************************************************************************/
+    function CalculateTotal(txt) {
+
+        var cashSal = $("#NewBasicCash").val();
+        var mealProv = $("#NewMealAllowanceProvided").val();
+        var cashMeal = $("#NewCashMealAllowance").val();
+        var cashCell = $("#NewCashCellphoneAllowance").val();
+
+        var total = (+cashSal + +mealProv + +cashMeal + +cashCell);
+        $("#@nameof(Model.RunningTotal)").val(parseFloat(total).toFixed(2));
+
+        if (txt !== "" && txt.val() === "") txt.val("0.00");
+    }
+
+</script>

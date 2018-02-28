@@ -1,0 +1,30 @@
+﻿@model SalaryUpdate.ViewModels.SalaryUpdateViewModel
+
+@{
+    ViewBag.Title = "Home Page";
+}
+
+@section nav
+{
+    <li><a id="export-csv"><i class="fa fa-file-excel-o"></i> Export to .CSV</a></li>
+}
+
+<div class="row">
+    @Html.Partial("_Search", Model)
+    @Html.Partial("_Compensation", Model)
+</div>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function() {
+            $("#export-csv").click(function () {
+                var btn = $(this);
+                btn.toggleButton();
+                $.when(sendJsonWithAjax('@Url.Action("MakeCsv")', {}, '')).always(function() {
+                    btn.toggleButton();
+                });
+            });
+        });
+    </script>
+}
